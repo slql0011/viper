@@ -263,13 +263,13 @@ func initDirs(t *testing.T) (string, string, func()) {
 	require.Nil(t, err)
 
 	for _, dir := range testDirs {
-		err = os.Mkdir(dir, 0750)
+		err = os.Mkdir(dir, 0o750)
 		assert.Nil(t, err)
 
 		err = ioutil.WriteFile(
 			path.Join(dir, config+".toml"),
 			[]byte("key = \"value is "+dir+"\"\n"),
-			0640)
+			0o640)
 		assert.Nil(t, err)
 	}
 
@@ -345,7 +345,7 @@ func TestSearchInPath(t *testing.T) {
 func TestSearchInPath_FilesOnly(t *testing.T) {
 	fs := afero.NewMemMapFs()
 
-	err := fs.Mkdir("/tmp/config", 0777)
+	err := fs.Mkdir("/tmp/config", 0o777)
 	require.NoError(t, err)
 
 	_, err = fs.Create("/tmp/config/config.yaml")
@@ -2142,7 +2142,7 @@ func newViperWithConfigFile(t *testing.T) (*Viper, string, func()) {
 	watchDir, err := ioutil.TempDir("", "")
 	require.Nil(t, err)
 	configFile := path.Join(watchDir, "config.yaml")
-	err = ioutil.WriteFile(configFile, []byte("foo: bar\n"), 0640)
+	err = ioutil.WriteFile(configFile, []byte("foo: bar\n"), 0o640)
 	require.Nil(t, err)
 	cleanup := func() {
 		os.RemoveAll(watchDir)
@@ -2159,11 +2159,11 @@ func newViperWithSymlinkedConfigFile(t *testing.T) (*Viper, string, string, func
 	watchDir, err := ioutil.TempDir("", "")
 	require.Nil(t, err)
 	dataDir1 := path.Join(watchDir, "data1")
-	err = os.Mkdir(dataDir1, 0777)
+	err = os.Mkdir(dataDir1, 0o777)
 	require.Nil(t, err)
 	realConfigFile := path.Join(dataDir1, "config.yaml")
 	t.Logf("Real config file location: %s\n", realConfigFile)
-	err = ioutil.WriteFile(realConfigFile, []byte("foo: bar\n"), 0640)
+	err = ioutil.WriteFile(realConfigFile, []byte("foo: bar\n"), 0o640)
 	require.Nil(t, err)
 	cleanup := func() {
 		os.RemoveAll(watchDir)
@@ -2204,7 +2204,7 @@ func TestWatchFile(t *testing.T) {
 		})
 		v.WatchConfig()
 		// when overwriting the file and waiting for the custom change notification handler to be triggered
-		err = ioutil.WriteFile(configFile, []byte("foo: baz\n"), 0640)
+		err = ioutil.WriteFile(configFile, []byte("foo: baz\n"), 0o640)
 		wg.Wait()
 		// then the config value should have changed
 		require.Nil(t, err)
@@ -2227,10 +2227,10 @@ func TestWatchFile(t *testing.T) {
 		wg.Add(1)
 		// when link to another `config.yaml` file
 		dataDir2 := path.Join(watchDir, "data2")
-		err := os.Mkdir(dataDir2, 0777)
+		err := os.Mkdir(dataDir2, 0o777)
 		require.Nil(t, err)
 		configFile2 := path.Join(dataDir2, "config.yaml")
-		err = ioutil.WriteFile(configFile2, []byte("foo: baz\n"), 0640)
+		err = ioutil.WriteFile(configFile2, []byte("foo: baz\n"), 0o640)
 		require.Nil(t, err)
 		// change the symlink using the `ln -sfn` command
 		err = exec.Command("ln", "-sfn", dataDir2, path.Join(watchDir, "data")).Run()
